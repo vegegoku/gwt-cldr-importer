@@ -20,5 +20,9 @@ Gwt tool to generate CLDR classes for gwt from CLDR data
     
     to generate the classes for a limited set of locales you pass the locale system property
     
-    `gradle generate -Dlocale=<comma separated locales> -Dcldr.version=<cldr data version`
+    `gradle generate -Dlocale=<comma separated locales> -Dcldr.version=<cldr data version>`
+    
+    to generate the classes into the gwt-cldr repository use 
+    
+    `gradle generate -Dcldr.version=<cldr data version> -Dgwt.cldr.root=<local gwt cldr repo root folder>`
     
