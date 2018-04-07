@@ -167,7 +167,7 @@ public class LocalizedNamesProcessor extends Processor {
         factoryWriter.println();
         factoryWriter.println("public class LocalizedNames_factory {");
         factoryWriter.println();
-        factoryWriter.println(" public LocalizedNames create(){");
+        factoryWriter.println(" public static LocalizedNames create(){");
         factoryWriter.println();
 
         for (GwtLocale locale : localesToPrint) {

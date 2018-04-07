@@ -545,7 +545,7 @@ public class DateTimeFormatInfoProcessor extends Processor {
     factoryWriter.println();
 
     factoryWriter.println("public class DateTimeFormatInfo_factory {");
-    factoryWriter.println(" public DateTimeFormatInfo create(){");
+    factoryWriter.println(" public static DateTimeFormatInfo create(){");
     factoryWriter.println();
 
     for (GwtLocale locale : localesToPrint) {
