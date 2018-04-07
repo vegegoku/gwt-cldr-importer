@@ -531,6 +531,23 @@ public class DateTimeFormatInfoProcessor extends Processor {
 
     writeVersionFile(clientShared + "/impl/cldr/DateTimeFormatInfo.versions.txt", localesToPrint);
 
+    String factoryPath = clientShared + "/impl/cldr/DateTimeFormatInfo_factory.java";
+    PrintWriter factoryWriter=createOutputFile(factoryPath);
+    printHeader(factoryWriter);
+    factoryWriter.print("package " + "org.gwtproject.i18n." + clientShared + ".impl.cldr;");
+    // GWT now requires JDK 1.6, so we always generate @Overrides
+    setOverrides(true);
+    factoryWriter.println();
+    factoryWriter.println("// DO NOT EDIT - GENERATED FROM CLDR AND ICU DATA");
+    factoryWriter.println();
+    factoryWriter.println("import org.gwtproject.i18n.shared.DateTimeFormatInfo;");
+    factoryWriter.println("import org.gwtproject.i18n.shared.DefaultDateTimeFormatInfo;");
+    factoryWriter.println();
+
+    factoryWriter.println("public class DateTimeFormatInfo_factory {");
+    factoryWriter.println(" public DateTimeFormatInfo create(){");
+    factoryWriter.println();
+
     for (GwtLocale locale : localesToPrint) {
 
       System.out.println("Generating "+clientShared+" datetime format for locale : "+locale);
@@ -551,6 +568,11 @@ public class DateTimeFormatInfoProcessor extends Processor {
         className = "DateTimeFormatInfoImpl" + localeSuffix(locale);
       }
 
+      factoryWriter.println("   if(\""+locale.getAsString()+"\".equals(System.getProperty(\"locale\"))){");
+      factoryWriter.println("     return new "+className+"();");
+      factoryWriter.println("   }");
+      factoryWriter.println();
+
       String path = clientShared + "/";
       if (!locale.isDefault()) {
         path += "impl/cldr/";
@@ -559,6 +581,11 @@ public class DateTimeFormatInfoProcessor extends Processor {
 
       writeOneJavaFile(path, packageName, className, locale);
     }
+
+    factoryWriter.println("     return new DefaultDateTimeFormatInfo();");
+    factoryWriter.println(" }");
+    factoryWriter.println("}");
+    factoryWriter.close();
   }
 
   /**
