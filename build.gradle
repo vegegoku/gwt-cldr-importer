@@ -48,11 +48,13 @@ tasks {
         }
     }
 
-    task updatecldr(type: Copy, dependsOn: buildCldr) {
+    task updatecldr(type: Copy) {
         if (project.hasProperty("update")) {
             println('copying CLDR jars ---------------')
             from cldrdir.toString()+'/tools/java/libs/icu4j.jar'
+            into './cldr-lib'
             from cldrdir.toString()+'/tools/java/libs/utilities.jar'
+            into './cldr-lib'
             from cldrdir.toString()+'/tools/java/cldr.jar'
             into './cldr-lib'
         }
