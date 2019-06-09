@@ -1,3 +1,7 @@
+plugins {
+    id 'org.ajoberstar.grgit' version '3.1.1' apply false
+}
+
 group 'org.gwtproject.tools'
 version '1.0-SNAPSHOT'
 
@@ -11,6 +15,7 @@ System.setProperty("CLDR_DIR", cldrdir.toString())
 
 repositories {
     mavenCentral()
+    jcenter()
     flatDir {
         dirs 'cldr-lib'
     }
@@ -20,6 +25,7 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
+
     compile group: 'com.google.gwt', name: 'gwt-user', version: '2.8.2'
     compile group: 'com.google.gwt', name: 'gwt-dev', version: '2.8.2'
     compile group: 'com.google.gwt', name: 'gwt-servlet', version: '2.8.2'
@@ -27,22 +33,27 @@ dependencies {
     compile name: 'cldr'
     compile name: 'icu4j'
     compile name: 'utilities'
+    compile 'org.ajoberstar.grgit:grgit-core:3.1.1'
 }
+
 
 tasks {
     task downloadcldr() {
         if (project.hasProperty("update")) {
             exec {
                 println('downloading CLDR---------------')
-                commandLine 'svn', 'co', 'http://www.unicode.org/repos/cldr/tags/'+cldrVersion+'', cldrdir.toString()
+                delete cldrdir.toString()
+                commandLine 'git', 'clone','-b', cldrVersion,'--single-branch','--depth','1','https://github.com/unicode-org/cldr.git', cldrdir.toString()
             }
         }
     }
 
+//    ant.importBuild(cldrdir.toString()+'/tools/java/build.xml')
     task buildCldr(dependsOn: downloadcldr){
         if (project.hasProperty("update")) {
             exec {
                 println('building CLDR---------------')
+
                 commandLine 'ant', '-buildfile', cldrdir.toString()+'/tools/java/build.xml', 'clean', 'jar'
             }
         }

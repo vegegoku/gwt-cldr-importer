@@ -31,15 +31,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.ParseException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 /**
  * Loads data needed to produce DateTimeFormatInfo implementations.
@@ -548,9 +542,13 @@ public class DateTimeFormatInfoProcessor extends Processor {
     factoryWriter.println(" public static DateTimeFormatInfo create(){");
     factoryWriter.println();
 
-    for (GwtLocale locale : localesToPrint) {
+    List<GwtLocale> sorted = localesToPrint.stream()
+            .sorted(Comparator.comparing(GwtLocale::getAsString)
+                    .reversed())
+            .collect(Collectors.toList());
 
-      System.out.println("Generating "+clientShared+" datetime format for locale : "+locale);
+    for (GwtLocale locale : sorted) {
+      System.out.println("Generating " + clientShared + " datetime format for locale : " + locale);
       if (locale.isDefault() && "client".equals(clientShared)) {
         // The client default is hand-written code that extends the shared one.
         continue;
@@ -568,8 +566,8 @@ public class DateTimeFormatInfoProcessor extends Processor {
         className = "DateTimeFormatInfoImpl" + localeSuffix(locale);
       }
 
-      factoryWriter.println("   if(\""+locale.getAsString()+"\".equals(System.getProperty(\"locale\"))){");
-      factoryWriter.println("     return new "+className+"();");
+      factoryWriter.println("   if(System.getProperty(\"locale\").startsWith(\"" + locale.getAsString() + "\")){");
+      factoryWriter.println("     return new " + className + "();");
       factoryWriter.println("   }");
       factoryWriter.println();
 
@@ -581,6 +579,7 @@ public class DateTimeFormatInfoProcessor extends Processor {
 
       writeOneJavaFile(path, packageName, className, locale);
     }
+
 
     factoryWriter.println("     return new DefaultDateTimeFormatInfo();");
     factoryWriter.println(" }");
