@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -104,7 +104,7 @@ public abstract class Processor {
 
   /**
    * Initialize the shared portion of a Processor.
-   * 
+   *
    * @param outputDir output directory for created files
    * @param cldrFactory CLDR factory used to create new CLDRFile instances
    * @param localeData LocaleData instance to collect data from CLDR files
@@ -118,10 +118,10 @@ public abstract class Processor {
 
   /**
    * Execute this processor.
-   * 
+   *
    * It will call loadData, cleanupData, writeOutputFiles, and then reset on its
    * localeData instance.
-   * 
+   *
    * @throws IOException
    */
   public final void run() throws IOException {
@@ -201,7 +201,7 @@ public abstract class Processor {
 
   /**
    * Load data needed by this processor.
-   * 
+   *
    * @throws IOException
    */
   protected abstract void loadData() throws IOException;
@@ -302,7 +302,7 @@ public abstract class Processor {
 
   /**
    * Set whether method definitions should use @Override.
-   * 
+   *
    * @param useOverride
    */
   protected void setOverrides(boolean useOverride) {
@@ -311,7 +311,7 @@ public abstract class Processor {
 
   /**
    * Write output files produced by this processor.
-   * 
+   *
    * @throws IOException
    */
   protected abstract void writeOutputFiles() throws IOException;

@@ -73,9 +73,7 @@ tasks {
 
 
     task generate(type: JavaExec) {
-        if(new File(cldrdir.toString()).exists()==false){
-            throw new IllegalStateException("Please execute build with update first")
-        }
+        if(!(new File(cldrdir.toString()).exists()==false)){
 
         String localesProperty = System.getProperty("locales")
         String locales = localesProperty==null?"":localesProperty.toString()
@@ -101,5 +99,9 @@ tasks {
         classpath = sourceSets.main.compileClasspath + sourceSets.main.runtimeClasspath + configurations.compile + configurations.runtime
         args=argslist.toList()
         jvmArgs = ['-DCLDR_DIR=' + cldrdir.toString()]
+        }else{
+            println("Generation of data skipped, Please execute build with update first")
+        }
+
     }
 }
