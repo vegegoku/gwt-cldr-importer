@@ -16,9 +16,9 @@
 package org.gwtproject.tools.cldr;
 
 
-import junit.framework.TestCase;
 import org.gwtproject.i18n.processor.GwtLocaleFactoryImpl;
 import org.gwtproject.i18n.shared.GwtLocale;
+import junit.framework.TestCase;
 
 import java.util.Arrays;
 import java.util.Iterator;
