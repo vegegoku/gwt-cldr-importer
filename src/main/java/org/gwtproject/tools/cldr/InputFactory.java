@@ -15,6 +15,7 @@
  */
 package org.gwtproject.tools.cldr;
 
+import org.unicode.cldr.util.CLDRFile;
 import org.unicode.cldr.util.Factory;
 
 import java.util.ArrayList;
@@ -41,6 +42,17 @@ class InputFactory {
     return new InputFile(delegate.getSupplementalData());
   }
 
+  InputFile getNumberingSystemsData() {
+    return new InputFile(getNumberingSystems());
+  }
+
+  public CLDRFile getNumberingSystems() {
+    try {
+      return delegate.make("numberingSystems", false);
+    } catch (RuntimeException var2) {
+      return delegate.make(delegate.getSupplementalDirectory().getPath(), ".*").make("numberingSystems", false);
+    }
+  }
   /**
    * Returns the list of locales to generate.
    * @param restrictLocales a comma-separated list of locales to include, or null for all locales.

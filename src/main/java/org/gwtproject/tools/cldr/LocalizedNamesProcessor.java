@@ -15,7 +15,7 @@
  */
 package org.gwtproject.tools.cldr;
 
-import com.google.gwt.i18n.shared.GwtLocale;
+import org.gwtproject.i18n.shared.GwtLocale;
 import org.gwtproject.tools.cldr.RegionLanguageData.RegionPopulation;
 
 import java.io.File;
@@ -30,7 +30,7 @@ import java.util.*;
  */
 public class LocalizedNamesProcessor extends Processor {
 
-    private static class IndexedName implements Comparable<IndexedName> {
+    static class IndexedName implements Comparable<IndexedName> {
 
         private final int index;
         private final CollationKey key;
@@ -54,7 +54,7 @@ public class LocalizedNamesProcessor extends Processor {
     }
 
     /**
-     * Split a list of region codes into an array.
+     * Split a list of region codes into an array.client
      *
      * @param regionList comma-separated list of region codes
      * @return array of region codes, null if none
@@ -150,20 +150,18 @@ public class LocalizedNamesProcessor extends Processor {
     @Override
     protected void writeOutputFiles() throws IOException {
         Set<GwtLocale> localesToPrint = localeData.getNonEmptyLocales("territory");
-        String cldrDir = "client/impl/cldr/";
-        writeVersionFile(cldrDir + "LocalizedNames.versions.txt", localesToPrint);
+        String cldrDir = "shared/cldr/impl/";
 
-        String factoryPath = "client/impl/cldr/LocalizedNames_factory.java";
+        String factoryPath = "shared/cldr/impl/LocalizedNames_factory.java";
         PrintWriter factoryWriter = createOutputFile(factoryPath);
         printHeader(factoryWriter);
-        factoryWriter.print("package " + "org.gwtproject.i18n.client.impl.cldr;");
+        factoryWriter.print("package " + "org.gwtproject.i18n.shared.cldr.impl;");
         // GWT now requires JDK 1.6, so we always generate @Overrides
         setOverrides(true);
         factoryWriter.println();
         factoryWriter.println("// DO NOT EDIT - GENERATED FROM CLDR AND ICU DATA");
         factoryWriter.println();
-        factoryWriter.println("import org.gwtproject.i18n.client.DefaultLocalizedNames;");
-        factoryWriter.println("import org.gwtproject.i18n.client.LocalizedNames;");
+        factoryWriter.println("import org.gwtproject.i18n.shared.cldr.LocalizedNames;");
         factoryWriter.println();
         factoryWriter.println("public class LocalizedNames_factory {");
         factoryWriter.println();
@@ -179,6 +177,7 @@ public class LocalizedNamesProcessor extends Processor {
                     regionCodesWithNames.add(regionCode);
                 }
             }
+
             String[] sortOrder = getRegionOrder(namesMap.get("!sortorder"));
             String[] likelyOrder = getRegionOrder(namesMap.get("!likelyorder"));
             if (regionCodesWithNames.isEmpty() && sortOrder == null && likelyOrder == null) {
@@ -188,7 +187,7 @@ public class LocalizedNamesProcessor extends Processor {
             // sort for deterministic output
             Collections.sort(regionCodesWithNames);
             if (locale.isDefault()) {
-                generateDefaultLocale("client/DefaultLocalizedNames.java",
+                generateDefaultLocale("shared/cldr/impl/DefaultLocalizedNames.java",
                         locale, namesMap, regionCodesWithNames, sortOrder, likelyOrder);
             }
 
@@ -221,9 +220,11 @@ public class LocalizedNamesProcessor extends Processor {
         try {
             pw = createOutputFile(path);
             printHeader(pw);
-            pw.println("package org.gwtproject.i18n.client;");
+            pw.println("package org.gwtproject.i18n.shared.cldr.impl;");
             pw.println();
             printVersion(pw, locale, "// ");
+            pw.println();
+            pw.println("import org.gwtproject.i18n.shared.cldr.DefaultLocalizedNamesBase;");
             pw.println();
             pw.println("/**");
             pw.println(" * Default LocalizedNames implementation.");
@@ -261,7 +262,9 @@ public class LocalizedNamesProcessor extends Processor {
         try {
             pw = createOutputFile(path);
             printHeader(pw);
-            pw.println("package org.gwtproject.i18n.client.impl.cldr;");
+            pw.println("package org.gwtproject.i18n.shared.cldr.impl;");
+            pw.println();
+            pw.println("import org.gwtproject.i18n.shared.cldr.LocalizedNamesImplBase;");
             pw.println();
             printVersion(pw, locale, "// ");
             pw.println();

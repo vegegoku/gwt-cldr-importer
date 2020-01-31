@@ -15,59 +15,20 @@
  */
 package org.gwtproject.tools.cldr;
 
-import com.google.gwt.codegen.server.AbortablePrintWriter;
-import com.google.gwt.codegen.server.JavaSourceWriterBuilder;
-import com.google.gwt.codegen.server.LoggingCodeGenContext;
-import com.google.gwt.i18n.shared.GwtLocale;
-
+import com.squareup.javapoet.AnnotationSpec;
+import org.gwtproject.i18n.shared.GwtLocale;
 import org.unicode.cldr.util.CLDRFile;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import javax.annotation.Generated;
+import java.io.*;
+import java.util.*;
+
+import static java.util.Objects.isNull;
 
 /**
  * Base class for CLDR processors that generate GWT i18n resources.
  */
 public abstract class Processor {
-
-  /**
-   * A CodeGenContext implementation that logs to j.u.logging and creates
-   * output files using {@link Processor#createOutputFile(String, String)}.
-   */
-  protected class ProcessorCodeGenContext extends LoggingCodeGenContext {
-    @Override
-    public JavaSourceWriterBuilder addClass(String superPkg, String pkgName, String className) {
-      String pkgPath = superPkg == null ? pkgName : superPkg + '/' + pkgName;
-      if (pkgPath.length() > 0) {
-        pkgPath = pkgPath.replace('.', '/') + '/';
-      }
-      String classPath = className.replace('.', '_');
-      String fileName = pkgPath + classPath + ".java";
-      try {
-        PrintWriter pw = createOutputFile("", fileName);
-        AbortablePrintWriter apw = new AbortablePrintWriter(pw);
-        printHeader(apw);
-        return new JavaSourceWriterBuilder(apw, pkgName, className);
-      } catch (FileNotFoundException e) {
-        error("Unable to create " + fileName, e);
-        return null;
-      } catch (IOException e) {
-        error("Unable to create " + fileName, e);
-        return null;
-      }
-    }
-  }
 
   protected static final String I18N_PACKAGE_PATH = "src/main/java/org/gwtproject/i18n/";
 
@@ -84,6 +45,13 @@ public abstract class Processor {
 
   protected static String localeSuffix(GwtLocale locale) {
     return (locale.isDefault() ? "" : "_") + locale.getAsString();
+  }
+
+  protected static String localeSuffix(GwtLocale locale, String defaultSplitter) {
+    if(isNull(locale)){
+      return "_";
+    }
+    return (locale.isDefault() ? defaultSplitter : "_") + locale.getAsString();
   }
 
   /**
@@ -258,46 +226,10 @@ public abstract class Processor {
     pw.println(prefix + "DO NOT EDIT - GENERATED FROM CLDR DATA");
   }
 
-  /**
-   * Writes a file containing CLDR version information.
-   * @param path the filename, relative to {@link #I18N_PACKAGE_PATH}.
-   */
-  protected void writeVersionFile(String path, Set<GwtLocale> locales) throws IOException {
-    Map<String, GwtLocale> byName = new HashMap<String, GwtLocale>();
-    for (GwtLocale locale : locales) {
-      String name = locale.getAsString();
-      if (byName.containsKey(name)) {
-        throw new RuntimeException("more than one locale with name: " + name);
-      }
-      byName.put(name, locale);
-    }
-
-    List<String> names = new ArrayList<String>(byName.keySet());
-    Collections.sort(names);
-
-    PrintWriter out = createOutputFile(path);
-    out.println("cldrVersion=" + CLDRFile.GEN_VERSION);
-    out.println();
-    for (String name : names) {
-      Map<String, String> props = localeData.getEntries("version", byName.get(name));
-      List<String> keys = new ArrayList<String>(props.keySet());
-      Collections.sort(keys);
-      for (String key : keys) {
-        if (key.equals("date") || key.equals("type")) {
-          // The date comes from Subversion and depends on the local machine's timezone.
-          // Skip it to make the build deterministic.
-
-          // There is more than one "type" field and it's not obviously useful.
-          continue;
-        }
-        String value = props.get(key);
-        if (!name.isEmpty()) {
-          key = name + "." + key;
-        }
-        out.println(key + "=" + value);
-      }
-    }
-    out.close();
+  protected static AnnotationSpec generatedAnnotation(Class<? extends Processor> processor) {
+    return AnnotationSpec.builder(Generated.class)
+            .addMember("value", "\""+"gwt-cldr-importer : "+processor.getCanonicalName()+", CLDR version : "+CldrVersion.value+"\"")
+            .build();
   }
 
   /**

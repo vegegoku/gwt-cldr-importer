@@ -15,10 +15,10 @@
  */
 package org.gwtproject.tools.cldr;
 
-import com.google.gwt.i18n.server.GwtLocaleFactoryImpl;
-import com.google.gwt.i18n.shared.GwtLocale;
 
 import junit.framework.TestCase;
+import org.gwtproject.i18n.processor.GwtLocaleFactoryImpl;
+import org.gwtproject.i18n.shared.GwtLocale;
 
 import java.util.Arrays;
 import java.util.Iterator;

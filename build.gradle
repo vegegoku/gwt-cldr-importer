@@ -14,6 +14,7 @@ String cldrdir = buildDir.toString() + '/cldr-data/' + cldrVersion.toString()
 System.setProperty("CLDR_DIR", cldrdir.toString())
 
 repositories {
+    mavenLocal()
     mavenCentral()
     jcenter()
     flatDir {
@@ -26,10 +27,15 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
 
-    compile group: 'com.google.gwt', name: 'gwt-user', version: '2.8.2'
-    compile group: 'com.google.gwt', name: 'gwt-dev', version: '2.8.2'
-    compile group: 'com.google.gwt', name: 'gwt-servlet', version: '2.8.2'
+    compile group: 'org.gwtproject.i18n', name: 'gwt-numberformat', version: '1.0-SNAPSHOT'
+    compile group: 'org.gwtproject.i18n', name: 'gwt-i18n-processor-util', version: '1.0-SNAPSHOT'
+    compile group: 'org.gwtproject.i18n', name: 'gwt-cldr', version: '1.0-SNAPSHOT'
+    compile group: 'org.gwtproject.i18n', name: 'gwt-i18n', version: '1.0-SNAPSHOT'
+    compile group: 'org.gwtproject.i18n', name: 'gwt-datetimeformat', version: '1.0-SNAPSHOT'
     compile group: 'com.google.guava', name: 'guava', version: '19.0'
+    // https://mvnrepository.com/artifact/com.squareup/javapoet
+    compile group: 'com.squareup', name: 'javapoet', version: '1.11.1'
+
     compile name: 'cldr'
     compile name: 'icu4j'
     compile name: 'utilities'
@@ -86,7 +92,7 @@ tasks {
             println("Generating to build dir.. ")
         }
 
-        List<String> argslist = ['--sourcedir', cldrdir.toString() + '/common/main', '--outdir', outputDir.toString()].toList()
+        List<String> argslist = ['--sourcedir', cldrdir.toString() + '/common/main', '--outdir', outputDir.toString(), '--cldrversion', cldrVersion.toString()].toList()
         if(!locales.isEmpty()){
             println("generating for locales : "+locales)
             argslist.add("--restrictLocales")
