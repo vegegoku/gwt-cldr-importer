@@ -56,7 +56,6 @@ public class CurrencyListProcessor extends Processor {
 
     @Override
     protected void cleanupData() {
-//        localeData.removeDuplicates("currency");
     }
 
     @Override
@@ -112,33 +111,28 @@ public class CurrencyListProcessor extends Processor {
             currencyData.keySet().toArray(currencies);
             Arrays.sort(currencies);
 
-            try {
+            Properties extraInfo = new Properties();
+            InputStream extraResource = this.getClass().getClassLoader().getResourceAsStream("CurrencyExtra" + Processor.localeSuffix(locale) + ".extraInfo");
+            if (nonNull(extraResource)) {
+                extraInfo.load(extraResource);
+            }
 
-                Properties extraInfo = new Properties();
-                InputStream extraResource = this.getClass().getClassLoader().getResourceAsStream("CurrencyExtra" + Processor.localeSuffix(locale) + ".extraInfo");
-                if (nonNull(extraResource)) {
-                    extraInfo.load(extraResource);
-                }
+            for (String currencyCode : currencies) {
+                CurrencyInfo currencyInfo = new CurrencyInfo(currencyCode, currencyData.get(currencyCode), extraInfo.getProperty(currencyCode));
+                allCurrencyData.put(currencyCode, currencyInfo);
+            }
 
-                for (String currencyCode : currencies) {
-                    CurrencyInfo currencyInfo = new CurrencyInfo(currencyCode, currencyData.get(currencyCode), extraInfo.getProperty(currencyCode));
-                    allCurrencyData.put(currencyCode, currencyInfo);
-                }
+            String defCurrencyCode = getLocaleDefaultCurrency(locale);
+            // If this locale specifies a particular locale, or the one that is
+            // inherited has been changed in this locale, re-specify the default
+            // currency so the method will be generated.
+            if (defCurrencyCode == null && currencyData.containsKey(lastDefaultCurrencyCode)) {
+                defCurrencyCode = lastDefaultCurrencyCode;
+            }
 
-                String defCurrencyCode = getLocaleDefaultCurrency(locale);
-                // If this locale specifies a particular locale, or the one that is
-                // inherited has been changed in this locale, re-specify the default
-                // currency so the method will be generated.
-                if (defCurrencyCode == null && currencyData.containsKey(lastDefaultCurrencyCode)) {
-                    defCurrencyCode = lastDefaultCurrencyCode;
-                }
-
-                if (!currencyData.isEmpty() || defCurrencyCode != null) {
-                    generateOnLocale(path, packageName, locale, currencies, allCurrencyData, defCurrencyCode);
-                    lastDefaultCurrencyCode = defCurrencyCode;
-                }
-            } catch (Exception ex) {
-                LOGGER.log(Level.SEVERE, "failed to generate currency list : ", ex);
+            if (!currencyData.isEmpty() || defCurrencyCode != null) {
+                generateOnLocale(path, packageName, locale, currencies, allCurrencyData, defCurrencyCode);
+                lastDefaultCurrencyCode = defCurrencyCode;
             }
 
             generatePropertiesFile(path, locale, currencyData, currencies);
@@ -151,7 +145,7 @@ public class CurrencyListProcessor extends Processor {
                 .returns(CurrencyList.class);
 
         sorted.forEach(gwtLocale -> {
-            if(!gwtLocale.isDefault()) {
+            if (!gwtLocale.isDefault()) {
                 createMethod
                         .addCode(CodeBlock.builder()
                                 .beginControlFlow("if(System.getProperty($S).startsWith($S))", "locale", gwtLocale.isDefault() ? "default" : gwtLocale.getAsString())
@@ -269,7 +263,7 @@ public class CurrencyListProcessor extends Processor {
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PROTECTED)
                     .returns(ParameterizedTypeName.get(ClassName.get(HashMap.class), TypeName.get(String.class), TypeName.get(String.class)))
-                    .addStatement("$T<$T,$T> result = super.loadNamesMap()", HashMap.class, String.class, String.class);
+                    .addStatement("$T result = super.loadNamesMap()", ParameterizedTypeName.get(ClassName.get(HashMap.class), TypeName.get(String.class), TypeName.get(String.class)));
 
             statements.forEach(loadNamesMethod::addCode);
 
@@ -305,7 +299,7 @@ public class CurrencyListProcessor extends Processor {
 
     private void generatePropertiesFile(String path, GwtLocale locale, Map<String, String> map, String[] keys) throws IOException {
         System.out.println("Generating currency data for locale : " + locale);
-        PrintWriter pw = createOutputFile(path + "CurrencyData"+Processor.localeSuffix(locale) + ".properties");
+        PrintWriter pw = createOutputFile(path + "CurrencyData" + Processor.localeSuffix(locale) + ".properties");
         printHeader(pw);
         printVersion(pw, locale, "# ");
 
@@ -354,7 +348,7 @@ public class CurrencyListProcessor extends Processor {
             String curCode = attr.get("iso4217");
             if ("ZZ".equals(region) || "false".equals(attr.get("tender")) || "XXX".equals(curCode)) {
                 // ZZ is an undefined region, XXX is an unknown currency code (and needs
-                // to be special-cased because it is listed as used in Anartica!)
+                // to be special-cased because it is listed as used in Antarctica!)
                 continue;
             }
             String to = attr.get("to");

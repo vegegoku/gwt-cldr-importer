@@ -48,6 +48,7 @@ public class LocalesNativeNamesProcessor extends Processor {
 
     static {
         // TODO(jat): get this from CLDR data.
+        // We didnt find a way to get this from CLDR
         RTL_LOCALES.add("ar");
         RTL_LOCALES.add("fa");
         RTL_LOCALES.add("he");
@@ -75,8 +76,7 @@ public class LocalesNativeNamesProcessor extends Processor {
             Map<String, String> map = localeData.getEntries("territory", locale);
             List<String> countryCodes = new ArrayList<String>();
             for (String regionCode : map.keySet()) {
-                // only include real country codes
-                if (!"ZZ".equals(regionCode) && regionCode.length() == 2) {
+                if (!ZZ.equals(regionCode) && regionCode.length() == 2) {
                     countryCodes.add(regionCode);
                 }
             }
@@ -194,7 +194,7 @@ public class LocalesNativeNamesProcessor extends Processor {
                         TypeName.get(String.class),
                         TypeName.get(String.class)
                 ))
-                .addStatement("$T<$T,$T> result = new $T<>()", Map.class, String.class, String.class, HashMap.class);
+                .addStatement("$T result = new $T<>()", ParameterizedTypeName.get(ClassName.get(Map.class), TypeName.get(String.class), TypeName.get(String.class)), HashMap.class);
 
         PrintWriter propertiesWriter = createOutputFile(path + "/LocaleNativeDisplayNames-generated.properties");
         printPropertiesHeader(propertiesWriter);

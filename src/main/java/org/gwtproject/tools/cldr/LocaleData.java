@@ -625,30 +625,26 @@ public class LocaleData {
         Map<String, Double> languageMaxPopulation = new HashMap<>();
         for (String path : supp.listPaths("//supplementalData/territoryInfo/territory")) {
 
-            try {
-                parts.set(supp.getFullXPath(path));
+            parts.set(supp.getFullXPath(path));
 
-                Map<String, String> territoryAttributes = parts.findAttributes("territory");
-                if (territoryAttributes == null) {
-                    continue;
+            Map<String, String> territoryAttributes = parts.findAttributes("territory");
+            if (territoryAttributes == null) {
+                continue;
+            }
+
+            String region = territoryAttributes.get("type");
+            if (!"ZZ".equals(region)) {
+                double population = Double.parseDouble(territoryAttributes.get("population"));
+                Map<String, String> languagePopulationAttributes = parts.findAttributes("languagePopulation");
+                String language = languagePopulationAttributes.get("type");
+                double populationPercent = Double.parseDouble(languagePopulationAttributes.get("populationPercent"));
+
+                Double languagePopulation = (populationPercent / 100) * population;
+
+                if (!languageMaxPopulation.containsKey(language) || languagePopulation > languageMaxPopulation.get(language)) {
+                    languageMaxPopulation.put(language, languagePopulation);
+                    localesRegions.put(language, region);
                 }
-
-                String region = territoryAttributes.get("type");
-                if (!"ZZ".equals(region)) {
-                    double population = Double.parseDouble(territoryAttributes.get("population"));
-                    Map<String, String> languagePopulationAttributes = parts.findAttributes("languagePopulation");
-                    String language = languagePopulationAttributes.get("type");
-                    double populationPercent = Double.parseDouble(languagePopulationAttributes.get("populationPercent"));
-
-                    Double languagePopulation = (populationPercent / 100) * population;
-
-                    if (!languageMaxPopulation.containsKey(language) || languagePopulation > languageMaxPopulation.get(language)) {
-                        languageMaxPopulation.put(language, languagePopulation);
-                        localesRegions.put(language, region);
-                    }
-                }
-            } catch (Exception ex) {
-                System.out.println(ex);
             }
         }
 
@@ -657,7 +653,7 @@ public class LocaleData {
 
     void addVersions(InputFactory inputFactory) {
         for (GwtLocale locale : allLocales.keySet()) {
-            LOGGER.info("Add versions for locale : "+locale);
+            LOGGER.info("Add versions for locale : " + locale);
             Map<String, String> map = getMap("version", locale);
             InputFile file = inputFactory.load(allLocales.get(locale));
             XPathParts parts = new XPathParts();
@@ -687,7 +683,7 @@ public class LocaleData {
      */
     public void computeRedirects(String baseCategory, String standaloneCategory) {
         for (GwtLocale locale : allLocales.keySet()) {
-            LOGGER.info("Computing redirects for locale : "+locale);
+            LOGGER.info("Computing redirects for locale : " + locale);
             MapKey baseKey = new MapKey(baseCategory, locale);
             MapKey standaloneKey = new MapKey(standaloneCategory, locale);
             Map<String, String> baseMap = maps.get(baseKey);
@@ -1019,7 +1015,7 @@ public class LocaleData {
     public void summarizeTerritoryEntries(String category, RegionLanguageData regionLanguageData,
                                           String key, Map<String, String> values) {
         for (GwtLocale locale : allLocales.keySet()) {
-            LOGGER.info("Summarize territory entries for locale : "+locale);
+            LOGGER.info("Summarize territory entries for locale : " + locale);
             if (locale.getRegion() != null || locale.getLanguage() == null) {
                 // skip any that have a region or don't have a language
                 continue;
@@ -1054,7 +1050,7 @@ public class LocaleData {
 
         // map locales to territory data
         for (GwtLocale locale : allLocales.keySet()) {
-            LOGGER.info("Mapping locale to territory data for locale : "+locale);
+            LOGGER.info("Mapping locale to territory data for locale : " + locale);
             if (getEntry(category, locale, key) != null) {
                 // don't override what we set above
                 continue;
@@ -1069,7 +1065,7 @@ public class LocaleData {
     private void addAttributeEntries(String category, InputFactory cldrFactory, String prefix,
                                      String tag, String key, String attribute, String defaultValue) {
         for (GwtLocale locale : allLocales.keySet()) {
-            LOGGER.info("Adding ["+category+"/"+tag+ "] attribute entries for locale : "+locale);
+            LOGGER.info("Adding [" + category + "/" + tag + "] attribute entries for locale : " + locale);
             addAttributeEntry(category, locale, cldrFactory, prefix, tag, key, attribute, defaultValue);
         }
     }
@@ -1176,7 +1172,7 @@ public class LocaleData {
 
     private void buildInheritsFrom() {
         for (GwtLocale locale : allLocales.keySet()) {
-            LOGGER.info("Build inherits from for locale : "+locale);
+            LOGGER.info("Build inherits from for locale : " + locale);
             GwtLocale parent = null;
             for (GwtLocale search : locale.getInheritanceChain()) {
                 if (!search.equals(locale) && allLocales.containsKey(search)) {
@@ -1199,7 +1195,7 @@ public class LocaleData {
         while (!remaining.isEmpty()) {
             Set<GwtLocale> nextPass = new HashSet<GwtLocale>();
             for (GwtLocale locale : remaining) {
-                LOGGER.info("Build locale depths for locale : "+locale);
+                LOGGER.info("Build locale depths for locale : " + locale);
                 GwtLocale parent = inheritsFrom.get(locale);
                 if (localeDepth.containsKey(parent)) {
                     int depth = localeDepth.get(parent);

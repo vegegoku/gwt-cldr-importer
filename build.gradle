@@ -1,15 +1,17 @@
 plugins {
     id 'org.ajoberstar.grgit' version '3.1.1' apply false
+    id "org.wisepersist.gwt" version "1.0.13"
 }
 
 group 'org.gwtproject.tools'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: "gwt"
 
 sourceCompatibility = 1.8
 String cldrSystemVersion = System.getProperty("cldr.version")
-String cldrVersion= cldrSystemVersion ==null?'latest': cldrSystemVersion
+String cldrVersion = cldrSystemVersion == null ? 'latest' : cldrSystemVersion
 String cldrdir = buildDir.toString() + '/cldr-data/' + cldrVersion.toString()
 System.setProperty("CLDR_DIR", cldrdir.toString())
 
@@ -22,16 +24,15 @@ repositories {
     }
 }
 
-
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
-
-    compile group: 'org.gwtproject.i18n', name: 'gwt-numberformat', version: '1.0-SNAPSHOT'
-    compile group: 'org.gwtproject.i18n', name: 'gwt-i18n-processor-util', version: '1.0-SNAPSHOT'
-    compile group: 'org.gwtproject.i18n', name: 'gwt-cldr', version: '1.0-SNAPSHOT'
-    compile group: 'org.gwtproject.i18n', name: 'gwt-i18n', version: '1.0-SNAPSHOT'
-    compile group: 'org.gwtproject.i18n', name: 'gwt-datetimeformat', version: '1.0-SNAPSHOT'
+    def i18nVersion = '1.0-SNAPSHOT'
+    gwt group: 'org.gwtproject.i18n', name: 'gwt-numberformat', version: i18nVersion
+    gwt group: 'org.gwtproject.i18n', name: 'gwt-i18n-processor-util', version: i18nVersion
+    gwt group: 'org.gwtproject.i18n', name: 'gwt-cldr', version: i18nVersion
+    gwt group: 'org.gwtproject.i18n', name: 'gwt-i18n', version: i18nVersion
+    gwt group: 'org.gwtproject.i18n', name: 'gwt-datetimeformat', version: i18nVersion
     compile group: 'com.google.guava', name: 'guava', version: '19.0'
     // https://mvnrepository.com/artifact/com.squareup/javapoet
     compile group: 'com.squareup', name: 'javapoet', version: '1.11.1'
@@ -42,25 +43,23 @@ dependencies {
     compile 'org.ajoberstar.grgit:grgit-core:3.1.1'
 }
 
-
 tasks {
     task downloadcldr() {
         if (project.hasProperty("update")) {
             exec {
                 println('downloading CLDR---------------')
                 delete cldrdir.toString()
-                commandLine 'git', 'clone','-b', cldrVersion,'--single-branch','--depth','1','https://github.com/unicode-org/cldr.git', cldrdir.toString()
+                commandLine 'git', 'clone', '-b', cldrVersion, '--single-branch', '--depth', '1', 'https://github.com/unicode-org/cldr.git', cldrdir.toString()
             }
         }
     }
 
-//    ant.importBuild(cldrdir.toString()+'/tools/java/build.xml')
-    task buildCldr(dependsOn: downloadcldr){
+    task buildCldr(dependsOn: downloadcldr) {
         if (project.hasProperty("update")) {
             exec {
                 println('building CLDR---------------')
 
-                commandLine 'ant', '-buildfile', cldrdir.toString()+'/tools/java/build.xml', 'clean', 'jar'
+                commandLine 'ant', '-buildfile', cldrdir.toString() + '/tools/java/build.xml', 'clean', 'jar'
             }
         }
     }
@@ -68,44 +67,44 @@ tasks {
     task updatecldr(type: Copy) {
         if (project.hasProperty("update")) {
             println('copying CLDR jars ---------------')
-            from cldrdir.toString()+'/tools/java/libs/icu4j.jar'
+            from cldrdir.toString() + '/tools/java/libs/icu4j.jar'
             into './cldr-lib'
-            from cldrdir.toString()+'/tools/java/libs/utilities.jar'
+            from cldrdir.toString() + '/tools/java/libs/utilities.jar'
             into './cldr-lib'
-            from cldrdir.toString()+'/tools/java/cldr.jar'
+            from cldrdir.toString() + '/tools/java/cldr.jar'
             into './cldr-lib'
         }
     }
 
 
     task generate(type: JavaExec) {
-        if(!(new File(cldrdir.toString()).exists()==false)){
+        if (!(new File(cldrdir.toString()).exists() == false)) {
 
-        String localesProperty = System.getProperty("locales")
-        String locales = localesProperty==null?"":localesProperty.toString()
+            String localesProperty = System.getProperty("locales")
+            String locales = localesProperty == null ? "" : localesProperty.toString()
 
-        String outputDir=buildDir.toString()+"/gwt-cldr"
-        if(System.getProperty("gwt.cldr.root")!=null){
-            outputDir=System.getProperty("gwt.cldr.root")
-            println("Generating to "+outputDir)
-        }else{
-            println("Generating to build dir.. ")
-        }
+            String outputDir = buildDir.toString() + "/gwt-cldr"
+            if (System.getProperty("gwt.cldr.root") != null) {
+                outputDir = System.getProperty("gwt.cldr.root")
+                println("Generating to " + outputDir)
+            } else {
+                println("Generating to build dir.. ")
+            }
 
-        List<String> argslist = ['--sourcedir', cldrdir.toString() + '/common/main', '--outdir', outputDir.toString(), '--cldrversion', cldrVersion.toString()].toList()
-        if(!locales.isEmpty()){
-            println("generating for locales : "+locales)
-            argslist.add("--restrictLocales")
-            argslist.add(locales)
-        }else{
-            println("generating for all locales")
-        }
+            List<String> argslist = ['--sourcedir', cldrdir.toString() + '/common/main', '--outdir', outputDir.toString(), '--cldrversion', cldrVersion.toString()].toList()
+            if (!locales.isEmpty()) {
+                println("generating for locales : " + locales)
+                argslist.add("--restrictLocales")
+                argslist.add(locales)
+            } else {
+                println("generating for all locales")
+            }
 
-        main = 'org.gwtproject.tools.cldr.GenerateGwtCldrData'
-        classpath = sourceSets.main.compileClasspath + sourceSets.main.runtimeClasspath + configurations.compile + configurations.runtime
-        args=argslist.toList()
-        jvmArgs = ['-DCLDR_DIR=' + cldrdir.toString()]
-        }else{
+            main = 'org.gwtproject.tools.cldr.GenerateGwtCldrData'
+            classpath = sourceSets.main.compileClasspath + sourceSets.main.runtimeClasspath + configurations.compile + configurations.runtime
+            args = argslist.toList()
+            jvmArgs = ['-DCLDR_DIR=' + cldrdir.toString()]
+        } else {
             println("Generation of data skipped, Please execute build with update first")
         }
 

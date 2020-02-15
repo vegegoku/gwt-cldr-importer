@@ -25,6 +25,8 @@ import java.io.PrintWriter;
 import java.text.ParseException;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static org.gwtproject.tools.cldr.MessageFormatUtils.*;
@@ -33,6 +35,8 @@ import static org.gwtproject.tools.cldr.MessageFormatUtils.*;
  * Loads data needed to produce DateTimeFormatInfo implementations.
  */
 public class DateTimeFormatInfoProcessor extends Processor {
+
+    public static final Logger LOGGER = Logger.getLogger(DateTimeFormatInfoProcessor.class.getName());
 
     private static final String[] DAYS = new String[]{
             "sun", "mon", "tue", "wed", "thu", "fri", "sat"};
@@ -105,25 +109,15 @@ public class DateTimeFormatInfoProcessor extends Processor {
 
     @Override
     protected void cleanupData() {
-        System.out.println("Removing duplicates from date/time formats");
+        LOGGER.log(Level.INFO, "Removing duplicates from date/time formats");
         localeData.copyLocaleData("en", "default", "era-wide", "era-abbrev", "quarter-wide",
                 "quarter-abbrev", "day-wide", "day-sa-wide", "day-narrow", "day-sa-narrow", "day-abbrev",
                 "day-sa-abbrev", "month-wide", "month-sa-wide", "month-narrow", "month-sa-narrow",
                 "month-abbrev", "month-sa-abbrev");
         removeUnusedFormats();
-//        localeData.removeDuplicates("predef");
-//        localeData.removeDuplicates("weekdata");
-//        localeData.removeDuplicates("date");
-//        localeData.removeDuplicates("time");
-//        localeData.removeDuplicates("dateTime");
-//        localeData.removeCompleteDuplicates("dayPeriod-abbrev");
         computePeriodRedirects("day");
         computePeriodRedirects("month");
         computePeriodRedirects("day");
-//        removePeriodDuplicates("day");
-//        removePeriodDuplicates("month");
-//        removePeriodDuplicates("quarter");
-//        removePeriodDuplicates("era");
     }
 
     /**
@@ -341,7 +335,7 @@ public class DateTimeFormatInfoProcessor extends Processor {
                     value = fallback.get(key);
                 }
                 if (value == null) {
-                    System.err.println("Missing \"" + key + "\" in " + locale + "/" + category);
+                    LOGGER.log(Level.SEVERE, "Missing \"" + key + "\" in " + locale + "/" + category);
                     value = "";
                 }
                 if (first) {
@@ -372,7 +366,7 @@ public class DateTimeFormatInfoProcessor extends Processor {
 
     @Override
     protected void loadData() throws IOException {
-        System.out.println("Loading data for date/time formats");
+        LOGGER.log(Level.INFO, "Loading data for date/time formats");
         localeData.addVersions(cldrFactory);
         localeData.addEntries("predef", cldrFactory,
                 "//ldml/dates/calendars/calendar[@type=\"gregorian\"]/dateTimeFormats/"
@@ -406,7 +400,7 @@ public class DateTimeFormatInfoProcessor extends Processor {
     protected void writeOneJavaFile(String path, String packageName, String className,
                                     GwtLocale locale) throws IOException {
         // TODO(jat): make uz_UZ inherit from uz_Cyrl rather than uz, for example
-        System.out.println("Generating DateTimeFormatInfo for locale : " + locale.getAsString());
+        LOGGER.log(Level.INFO, "Generating DateTimeFormatInfo for locale : " + locale.getAsString());
 
         GwtLocale parent = localeData.inheritsFrom(locale);
         PrintWriter pw = createOutputFile(path);
@@ -585,7 +579,7 @@ public class DateTimeFormatInfoProcessor extends Processor {
                 String cldrPattern = localeData.getEntry("predef", locale, skeleton);
                 String pattern = dtpg.getBestPattern(skeleton);
                 if (cldrPattern != null && !cldrPattern.equals(pattern)) {
-                    System.err.println("Mismatch on skeleton pattern in locale " + locale + " for skeleton '"
+                    LOGGER.log(Level.SEVERE, "Mismatch on skeleton pattern in locale " + locale + " for skeleton '"
                             + skeleton + "': icu='" + pattern + "', cldr='" + cldrPattern + "'");
                 }
                 localeData.addEntry("predef", locale, skeleton, pattern);

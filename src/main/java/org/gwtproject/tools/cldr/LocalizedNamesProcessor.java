@@ -54,7 +54,7 @@ public class LocalizedNamesProcessor extends Processor {
     }
 
     /**
-     * Split a list of region codes into an array.client
+     * Split a list of region codes into an array.
      *
      * @param regionList comma-separated list of region codes
      * @return array of region codes, null if none
@@ -83,8 +83,7 @@ public class LocalizedNamesProcessor extends Processor {
             Map<String, String> map = localeData.getEntries("territory", locale);
             List<String> countryCodes = new ArrayList<String>();
             for (String regionCode : map.keySet()) {
-                // only include real country codes
-                if (!"ZZ".equals(regionCode) && regionCode.length() == 2) {
+                if (!ZZ.equals(regionCode) && regionCode.length() == 2) {
                     countryCodes.add(regionCode);
                 }
             }
