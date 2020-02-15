@@ -33,4 +33,15 @@ Gwt tool to generate CLDR classes for gwt from CLDR data
     
     
 > CLDR version can be a tag name or a branch from the new github repository https://github.com/unicode-org/cldr
+
+
+### Generated data:
+
+- Currency Lists
+- Locales Native Names
+- Number Constants
+- List Formatting
+- Localized Names
+- DateTime Format Info
+
     

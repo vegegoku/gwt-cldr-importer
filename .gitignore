@@ -55,6 +55,7 @@ src/main/webapp/gwt_bree/
 .gradle
 /build/
 /cldr-lib/*.jar
+**/out/
 
 # Ignore Gradle GUI config
 gradle-app.setting
