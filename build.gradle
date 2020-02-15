@@ -16,7 +16,6 @@ String cldrdir = buildDir.toString() + '/cldr-data/' + cldrVersion.toString()
 System.setProperty("CLDR_DIR", cldrdir.toString())
 
 repositories {
-    mavenLocal()
     mavenCentral()
     jcenter()
     flatDir {
