@@ -175,8 +175,10 @@ public class LocalesNativeNamesProcessor extends Processor {
         String path = "shared/cldr/impl";
 
         List<GwtLocale> sorted = localesToPrint.stream()
-                .sorted(Comparator.comparing(GwtLocale::getAsString))
-                .collect(Collectors.toList());
+                .sorted(Comparator
+                        .comparing(GwtLocale::getAsString)
+                        .reversed()
+                ).collect(Collectors.toList());
         String packageName = "org.gwtproject.i18n.shared.cldr.impl";
 
         generateFactory(path, packageName, sorted);
@@ -338,11 +340,19 @@ public class LocalesNativeNamesProcessor extends Processor {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(LocaleInfoImpl.class);
 
+        createMethod
+                .addCode(CodeBlock.builder()
+                        .beginControlFlow("if(System.getProperty($S).equals($S))", "locale", "default")
+                        .addStatement("return new $T()", ClassName.bestGuess("LocaleInfoImpl_"))
+                        .endControlFlow()
+                        .build());
+
         sorted.forEach(gwtLocale -> {
             if (!gwtLocale.isDefault()) {
+                gwtLocale.isDefault();
                 createMethod
                         .addCode(CodeBlock.builder()
-                                .beginControlFlow("if(System.getProperty($S).startsWith($S))", "locale", gwtLocale.isDefault() ? "default" : gwtLocale.getAsString())
+                                .beginControlFlow("if(System.getProperty($S).startsWith($S))", "locale", gwtLocale.getAsString())
                                 .addStatement("return new $T()", ClassName.bestGuess("LocaleInfoImpl" + Processor.localeSuffix(gwtLocale, "_")))
                                 .endControlFlow()
                                 .build()

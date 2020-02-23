@@ -16,6 +16,9 @@ String cldrdir = buildDir.toString() + '/cldr-data/' + cldrVersion.toString()
 System.setProperty("CLDR_DIR", cldrdir.toString())
 
 repositories {
+    maven {
+        url 'https://repo.vertispan.com/gwt-snapshot/'
+    }
     mavenCentral()
     jcenter()
     flatDir {

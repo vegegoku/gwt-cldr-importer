@@ -144,15 +144,24 @@ public class CurrencyListProcessor extends Processor {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(CurrencyList.class);
 
+        createMethod
+                .addCode(CodeBlock.builder()
+                        .beginControlFlow("if(System.getProperty($S).equals($S))", "locale", "default")
+                        .addStatement("return new $T()", ClassName.bestGuess("CurrencyList_"))
+                        .endControlFlow()
+                        .build());
+
         sorted.forEach(gwtLocale -> {
             if (!gwtLocale.isDefault()) {
-                createMethod
-                        .addCode(CodeBlock.builder()
-                                .beginControlFlow("if(System.getProperty($S).startsWith($S))", "locale", gwtLocale.isDefault() ? "default" : gwtLocale.getAsString())
-                                .addStatement("return new $T()", ClassName.bestGuess("CurrencyList" + Processor.localeSuffix(gwtLocale, "_")))
-                                .endControlFlow()
-                                .build()
-                        );
+                if (!gwtLocale.isDefault()) {
+                    createMethod
+                            .addCode(CodeBlock.builder()
+                                    .beginControlFlow("if(System.getProperty($S).startsWith($S))", "locale", gwtLocale.getAsString())
+                                    .addStatement("return new $T()", ClassName.bestGuess("CurrencyList" + Processor.localeSuffix(gwtLocale, "_")))
+                                    .endControlFlow()
+                                    .build()
+                            );
+                }
             }
         });
 

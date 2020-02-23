@@ -50,7 +50,6 @@ public class NumberConstantsProcessor extends Processor {
 
     @Override
     protected void cleanupData() {
-//        localeData.removeDuplicates("numberConstants");
     }
 
     @Override
@@ -123,11 +122,19 @@ public class NumberConstantsProcessor extends Processor {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(NumberConstants.class);
 
+        createMethod
+                .addCode(CodeBlock.builder()
+                        .beginControlFlow("if(System.getProperty($S).equals($S))", "locale", "default")
+                        .addStatement("return new $T()", ClassName.bestGuess("NumberConstantsImpl"))
+                        .endControlFlow()
+                        .build());
+
         sorted.forEach(gwtLocale -> {
             if (!gwtLocale.isDefault()) {
+                gwtLocale.isDefault();
                 createMethod
                         .addCode(CodeBlock.builder()
-                                .beginControlFlow("if(System.getProperty($S).startsWith($S))", "locale", gwtLocale.isDefault() ? "default" : gwtLocale.getAsString())
+                                .beginControlFlow("if(System.getProperty($S).startsWith($S))", "locale", gwtLocale.getAsString())
                                 .addStatement("return new $T()", ClassName.bestGuess("NumberConstantsImpl" + Processor.localeSuffix(gwtLocale)))
                                 .endControlFlow()
                                 .build()

@@ -29,6 +29,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
 import static org.gwtproject.tools.cldr.MessageFormatUtils.*;
 
 /**
@@ -542,7 +543,12 @@ public class DateTimeFormatInfoProcessor extends Processor {
                 className = "DateTimeFormatInfoImpl" + localeSuffix(locale);
             }
 
-            factoryWriter.println("   if(System.getProperty(\"locale\").startsWith(\"" + (locale.isDefault() ? "default" : locale.getAsString()) + "\")){");
+            String localeName = locale.isDefault() ? "default" : locale.getAsString();
+            if(nonNull(locale.getRegion())) {
+                factoryWriter.println("   if(System.getProperty(\"locale\").startsWith(\"" + localeName + "\")){");
+            }else{
+                factoryWriter.println("   if(System.getProperty(\"locale\").startsWith(\"" + localeName + "_\") || System.getProperty(\"locale\").equals(\"" + localeName + "\")){");
+            }
             factoryWriter.println("     return new " + className + "();");
             factoryWriter.println("   }");
             factoryWriter.println();
