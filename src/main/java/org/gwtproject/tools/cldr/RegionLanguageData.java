@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,14 +15,14 @@
  */
 package org.gwtproject.tools.cldr;
 
-import org.unicode.cldr.util.XPathParts;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import org.unicode.cldr.util.XPathParts;
 
 /**
  * Encapsulates region/language literacy data from CLDR.
@@ -185,7 +185,7 @@ public class RegionLanguageData {
     InputFile supp = cldrFactory.getSupplementalData();
     XPathParts parts = new XPathParts();
     for (String path : supp.listPaths("//supplementalData/territoryInfo/territory")) {
-      parts.set(supp.getFullXPath(path));
+      parts.setForWritingWithSuppressionMap(supp.getFullXPath(path));
       String language = parts.findAttributeValue("languagePopulation", "type");
       if (language == null) {
         continue;

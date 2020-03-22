@@ -15,24 +15,40 @@
  */
 package org.gwtproject.tools.cldr;
 
-import com.squareup.javapoet.*;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import javax.lang.model.element.Modifier;
+
 import org.gwtproject.i18n.shared.GwtLocale;
 import org.gwtproject.i18n.shared.cldr.CurrencyData;
 import org.gwtproject.i18n.shared.cldr.CurrencyList;
 import org.unicode.cldr.util.XPathParts;
 
-import javax.lang.model.element.Modifier;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 
 /**
  * Loads data needed to produce DateTimeFormatInfo implementations.
@@ -327,7 +343,7 @@ public class CurrencyListProcessor extends Processor {
         defaultCurrencyFraction = 0;
         XPathParts parts = new XPathParts();
         for (String path : supp.listPaths("//supplementalData/currencyData/fractions/info")) {
-            parts.set(supp.getFullXPath(path));
+            parts.setForWritingWithSuppressionMap(supp.getFullXPath(path));
             Map<String, String> attr = parts.findAttributes("info");
             if (attr == null) {
                 continue;
@@ -348,7 +364,7 @@ public class CurrencyListProcessor extends Processor {
         // find which currencies are still in use in some region, everything else
         // should be marked as deprecated
         for (String path : supp.listPaths("//supplementalData/currencyData/region")) {
-            parts.set(supp.getFullXPath(path));
+            parts.setForWritingWithSuppressionMap(supp.getFullXPath(path));
             Map<String, String> attr = parts.findAttributes("currency");
             if (attr == null) {
                 continue;
