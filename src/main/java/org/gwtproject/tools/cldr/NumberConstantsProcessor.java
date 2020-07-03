@@ -118,13 +118,19 @@ public class NumberConstantsProcessor extends Processor {
 
     private void generateFactory(String path, String packageName, List<GwtLocale> sorted) throws IOException {
 
+        MethodSpec.Builder createDefaultMethod = MethodSpec.methodBuilder("create")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addStatement("return create(System.getProperty($S))", "locale")
+                .returns(NumberConstants.class);
+
         MethodSpec.Builder createMethod = MethodSpec.methodBuilder("create")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addParameter(ParameterSpec.builder(String.class, "locale").build())
                 .returns(NumberConstants.class);
 
         createMethod
                 .addCode(CodeBlock.builder()
-                        .beginControlFlow("if(System.getProperty($S).equals($S))", "locale", "default")
+                        .beginControlFlow("if($L.equals($S))", "locale", "default")
                         .addStatement("return new $T()", ClassName.bestGuess("NumberConstantsImpl"))
                         .endControlFlow()
                         .build());
@@ -134,7 +140,7 @@ public class NumberConstantsProcessor extends Processor {
                 gwtLocale.isDefault();
                 createMethod
                         .addCode(CodeBlock.builder()
-                                .beginControlFlow("if(System.getProperty($S).startsWith($S))", "locale", gwtLocale.getAsString())
+                                .beginControlFlow("if($L.startsWith($S))", "locale", gwtLocale.getAsString())
                                 .addStatement("return new $T()", ClassName.bestGuess("NumberConstantsImpl" + Processor.localeSuffix(gwtLocale)))
                                 .endControlFlow()
                                 .build()
@@ -147,6 +153,7 @@ public class NumberConstantsProcessor extends Processor {
         TypeSpec.Builder numberConstantsFactory = TypeSpec.classBuilder("NumberConstants_factory")
                 .addAnnotation(generatedAnnotation(this.getClass()))
                 .addModifiers(Modifier.PUBLIC)
+                .addMethod(createDefaultMethod.build())
                 .addMethod(createMethod.build());
 
         PrintWriter pw = createOutputFile(path + "NumberConstants_factory.java");
