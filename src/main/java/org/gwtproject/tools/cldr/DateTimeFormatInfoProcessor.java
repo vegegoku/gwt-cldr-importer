@@ -525,11 +525,8 @@ public class DateTimeFormatInfoProcessor extends Processor {
 
         factoryWriter.println("public class DateTimeFormatInfo_factory {");
         factoryWriter.println(" public static DateTimeFormatInfo create(){");
-        factoryWriter.println(" \treturn create(System.getProperty(\"locale\"));");
-        factoryWriter.println(" }");
         factoryWriter.println();
-        factoryWriter.println(" public static DateTimeFormatInfo create(String locale){");
-        factoryWriter.println();
+
         List<GwtLocale> sorted = localesToPrint.stream()
                 .sorted(Comparator.comparing(GwtLocale::getAsString)
                         .reversed())
@@ -548,9 +545,9 @@ public class DateTimeFormatInfoProcessor extends Processor {
 
             String localeName = locale.isDefault() ? "default" : locale.getAsString();
             if(nonNull(locale.getRegion())) {
-                factoryWriter.println("   if(locale.startsWith(\"" + localeName + "\")){");
+                factoryWriter.println("   if(System.getProperty(\"locale\").startsWith(\"" + localeName + "\")){");
             }else{
-                factoryWriter.println("   if(locale.startsWith(\"" + localeName + "_\") || locale.equals(\"" + localeName + "\")){");
+                factoryWriter.println("   if(System.getProperty(\"locale\").startsWith(\"" + localeName + "_\") || System.getProperty(\"locale\").equals(\"" + localeName + "\")){");
             }
             factoryWriter.println("     return new " + className + "();");
             factoryWriter.println("   }");
