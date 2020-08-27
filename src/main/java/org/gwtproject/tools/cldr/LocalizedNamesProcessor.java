@@ -165,10 +165,6 @@ public class LocalizedNamesProcessor extends Processor {
         factoryWriter.println("public class LocalizedNames_factory {");
         factoryWriter.println();
         factoryWriter.println(" public static LocalizedNames create(){");
-        factoryWriter.println(" \treturn create(System.getProperty(\"locale\"));");
-        factoryWriter.println(" }");
-        factoryWriter.println();
-        factoryWriter.println(" public static LocalizedNames create(String locale){");
         factoryWriter.println();
 
         for (GwtLocale locale : localesToPrint) {
@@ -203,7 +199,7 @@ public class LocalizedNamesProcessor extends Processor {
             }
             String path = cldrDir + "LocalizedNamesImpl" + localePart + "." + "java";
 
-            factoryWriter.println("   if(\"" + locale.getAsString() + "\".equals(locale)){");
+            factoryWriter.println("   if(\"" + locale.getAsString() + "\".equals(System.getProperty(\"locale\"))){");
             factoryWriter.println("     return new LocalizedNamesImpl" + localePart + "();");
             factoryWriter.println("   }");
             factoryWriter.println();

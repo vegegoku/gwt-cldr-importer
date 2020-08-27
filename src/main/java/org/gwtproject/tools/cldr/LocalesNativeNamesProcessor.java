@@ -336,19 +336,13 @@ public class LocalesNativeNamesProcessor extends Processor {
     }
 
     private void generateFactory(String path, String packageName, List<GwtLocale> sorted) throws IOException {
-        MethodSpec.Builder createDefaultMethod = MethodSpec.methodBuilder("create")
+        MethodSpec.Builder createMethod = MethodSpec.methodBuilder("create")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addStatement("return create(System.getProperty($S))", "locale")
                 .returns(LocaleInfoImpl.class);
 
-        MethodSpec.Builder createByLocaleMethod = MethodSpec.methodBuilder("create")
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addParameter(ParameterSpec.builder(String.class, "locale").build())
-                .returns(LocaleInfoImpl.class);
-
-        createByLocaleMethod
+        createMethod
                 .addCode(CodeBlock.builder()
-                        .beginControlFlow("if($L.equals($S))", "locale", "default")
+                        .beginControlFlow("if(System.getProperty($S).equals($S))", "locale", "default")
                         .addStatement("return new $T()", ClassName.bestGuess("LocaleInfoImpl_"))
                         .endControlFlow()
                         .build());
@@ -356,9 +350,9 @@ public class LocalesNativeNamesProcessor extends Processor {
         sorted.forEach(gwtLocale -> {
             if (!gwtLocale.isDefault()) {
                 gwtLocale.isDefault();
-                createByLocaleMethod
+                createMethod
                         .addCode(CodeBlock.builder()
-                                .beginControlFlow("if($L.startsWith($S))", "locale", gwtLocale.getAsString())
+                                .beginControlFlow("if(System.getProperty($S).startsWith($S))", "locale", gwtLocale.getAsString())
                                 .addStatement("return new $T()", ClassName.bestGuess("LocaleInfoImpl" + Processor.localeSuffix(gwtLocale, "_")))
                                 .endControlFlow()
                                 .build()
@@ -366,13 +360,12 @@ public class LocalesNativeNamesProcessor extends Processor {
             }
         });
 
-        createByLocaleMethod.addStatement("return new $T()", ClassName.bestGuess("LocaleInfoImpl_"));
+        createMethod.addStatement("return new $T()", ClassName.bestGuess("LocaleInfoImpl_"));
 
         TypeSpec.Builder listPatternsFactory = TypeSpec.classBuilder("LocaleInfo_factory")
                 .addAnnotation(generatedAnnotation(this.getClass()))
                 .addModifiers(Modifier.PUBLIC)
-                .addMethod(createDefaultMethod.build())
-                .addMethod(createByLocaleMethod.build());
+                .addMethod(createMethod.build());
 
 
         PrintWriter pw = createOutputFile(path + "/LocaleInfo_factory.java");
