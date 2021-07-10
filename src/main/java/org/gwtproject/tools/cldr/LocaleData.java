@@ -16,14 +16,24 @@
 package org.gwtproject.tools.cldr;
 
 
+import static java.util.Objects.isNull;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+
 import org.gwtproject.i18n.shared.GwtLocale;
 import org.gwtproject.i18n.shared.GwtLocaleFactory;
 import org.unicode.cldr.util.XPathParts;
-
-import java.util.*;
-import java.util.logging.Logger;
-
-import static java.util.Objects.isNull;
 
 /**
  * Collects all the locale data from CLDR, grouping it by how it will be used
@@ -349,7 +359,7 @@ public class LocaleData {
 
         Map<String, String> attr = null;
         if (fullPath != null) {
-            parts.set(fullPath);
+            parts.setForWritingWithSuppressionMap(fullPath);
             attr = parts.findAttributes(tag);
         }
 
@@ -431,7 +441,7 @@ public class LocaleData {
             if (fullXPath == null) {
                 fullXPath = path;
             }
-            parts.set(fullXPath);
+            parts.setForWritingWithSuppressionMap(fullXPath);
             if (parts.containsAttribute("alt")) {
                 // ignore alternate strings
                 continue;
@@ -470,7 +480,7 @@ public class LocaleData {
             if (fullXPath == null) {
                 fullXPath = path;
             }
-            parts.set(fullXPath);
+            parts.setForWritingWithSuppressionMap(fullXPath);
             if (parts.containsAttribute("alt")) {
                 // ignore alternate strings
                 continue;
@@ -544,7 +554,7 @@ public class LocaleData {
         Map<String, String> map = new HashMap<String, String>();
         XPathParts parts = new XPathParts();
         for (String path : supp.listPaths(prefix)) {
-            parts.set(supp.getFullXPath(path));
+            parts.setForWritingWithSuppressionMap(supp.getFullXPath(path));
             Map<String, String> attr = parts.findAttributes(tag);
             if (attr == null || attr.get("alt") != null) {
                 continue;
@@ -576,7 +586,7 @@ public class LocaleData {
         Map<String, String> map = new HashMap<String, String>();
         XPathParts parts = new XPathParts();
         for (String path : supp.listPaths("//supplementalData/numberingSystems/numberingSystem")) {
-            parts.set(supp.getFullXPath(path));
+            parts.setForWritingWithSuppressionMap(supp.getFullXPath(path));
             Map<String, String> attr = parts.findAttributes("numberingSystem");
             if (attr == null || attr.get("alt") != null) {
                 continue;
@@ -598,7 +608,7 @@ public class LocaleData {
         XPathParts parts = new XPathParts();
         Map<String, String> regionCurrencyMap = new HashMap<>();
         for (String path : supp.listPaths("//supplementalData/currencyData/region")) {
-            parts.set(supp.getFullXPath(path));
+            parts.setForWritingWithSuppressionMap(supp.getFullXPath(path));
             Map<String, String> attr = parts.findAttributes("currency");
             if (attr == null) {
                 continue;
@@ -625,7 +635,7 @@ public class LocaleData {
         Map<String, Double> languageMaxPopulation = new HashMap<>();
         for (String path : supp.listPaths("//supplementalData/territoryInfo/territory")) {
 
-            parts.set(supp.getFullXPath(path));
+            parts.setForWritingWithSuppressionMap(supp.getFullXPath(path));
 
             Map<String, String> territoryAttributes = parts.findAttributes("territory");
             if (territoryAttributes == null) {
@@ -662,7 +672,7 @@ public class LocaleData {
                 if (fullXPath == null) {
                     fullXPath = path;
                 }
-                parts.set(fullXPath);
+                parts.setForWritingWithSuppressionMap(fullXPath);
                 Map<String, String> attr = parts.getAttributes(2);
                 if (attr == null) {
                     continue;
@@ -1096,7 +1106,7 @@ public class LocaleData {
             if (fullPath == null) {
                 fullPath = path;
             }
-            parts.set(fullPath);
+            parts.setForWritingWithSuppressionMap(fullPath);
             Map<String, String> attr = parts.findAttributes("currency");
             if (attr == null) {
                 continue;
